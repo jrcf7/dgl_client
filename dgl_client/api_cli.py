@@ -15,8 +15,9 @@ class APIClient:
         self.auth_headers = None
         self.message_id = None
 
-    def login(self, bearer_token):
+    def login(self, tokens):
         self.auth_headers = {"Authorization": f"Bearer {bearer_token}"}
+        refresh_headers = {"Refresh": f"Bearer {bearer_token}"}
         response = self.http_client.get(
             f"{self.backend_url}/auth/check",
             json={},
