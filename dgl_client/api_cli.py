@@ -8,6 +8,42 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+def login_check(endp, tok):
+    logger.info("Trying to login...")
+    username = None
+    try:
+      response = requests.get(
+          f"{endp}/auth/check",
+          json={},
+          headers={"Authorization": f"Bearer {tok}"},
+      )
+      response.raise_for_status()
+      username = response.json()
+    except:
+      pass
+
+    return username
+
+def refresh_token(endp, atok, rtok):
+    logger.info("Refreshing login token...")
+    new_tok = None
+    try:
+      response = requests.get(
+          f"{endp}/auth/refresh",
+          json={},
+          headers={
+              "Authorization": f"Bearer {rtok}",
+              "Refresh": f"refresh_token {rtok}"
+              },
+      )
+      response.raise_for_status()
+      new_tok = response.json()
+    except:
+      raise
+    logger.info("New token is %s"%str(new_tok))
+
+    return new_tok
+
 class APIClient:
     def __init__(self, backend_url, http_client=requests):
         self.backend_url = backend_url
@@ -16,15 +52,16 @@ class APIClient:
         self.message_id = None
 
     def login(self, tokens):
-        self.auth_headers = {"Authorization": f"Bearer {bearer_token}"}
-        refresh_headers = {"Refresh": f"Bearer {bearer_token}"}
-        response = self.http_client.get(
-            f"{self.backend_url}/auth/check",
-            json={},
-            headers=self.auth_headers,
-        )
-        response.raise_for_status()
-        username = response.json()
+        print(tokens)
+        atok = tokens["access_token"]["access_token"] + "e"
+        rtok = tokens["refresh_token"]["access_token"]
+        self.auth_headers = {"Authorization": f"Bearer {atok}"}
+        username = login_check(self.backend_url, atok)
+        if username is None:
+          atok = refresh_token(self.backend_url, atok, rtok)
+          if atok:
+            username = login_check(self.backend_url, atok)
+
         logger.info(f"Logged in as {username}")
 
 

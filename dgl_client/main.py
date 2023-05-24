@@ -122,9 +122,8 @@ def main():
 
     args.func(args)
   except Exception as e:
-    print(e)
     parser.print_help()
-    sys.exit(0)
+    raise
 
 
 if __name__ == "__main__":  
