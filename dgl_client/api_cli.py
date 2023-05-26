@@ -32,8 +32,7 @@ def refresh_token(endp, atok, rtok):
           f"{endp}/auth/refresh",
           json={},
           headers={
-              "Authorization": f"Bearer {rtok}",
-              "Refresh": f"refresh_token {rtok}"
+              "Refresh": f"{rtok}"
               },
       )
       response.raise_for_status()
