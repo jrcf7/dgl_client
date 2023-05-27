@@ -75,12 +75,14 @@ def main_chat(args):
   return ass_reply
 
 def main():
-  API_ENDPOINT = "https://www.diglife.eu/inference"
+  DGL_API_ENDPOINT = "https://www.diglife.eu/inference"
+  if "DGL_API_ENDPOINT" in os.environ:
+    DGL_API_ENDPOINT = os.environ["DGL_API_ENDPOINT"]
 
   parser = argparse.ArgumentParser(description='DigLife API Client.')
   parser.add_argument('--logdir', type=str, default="logs/",
                       help='Where to store logs')
-  parser.add_argument('--endpoint', type=str, default=API_ENDPOINT,
+  parser.add_argument('--endpoint', type=str, default=DGL_API_ENDPOINT,
                       help='Endpoint for the inference')
 
   subparsers = parser.add_subparsers(help='You can choose between different commands')
