@@ -192,10 +192,20 @@ class APIClient:
                     yield data["text"]
                 elif event_type == "message":
                     # full message content, can be ignored here
-                    break
+                    if "message" in data:
+                        if "content" in data['message']:
+                            yield data['message']["content"]
+                        else:
+                            _s = data["message"]
+                            logger.debug(f"Message event type but no content? {_s=}")                             
+                    else:
+                        logger.debug(f"Message event type but no message? {data=}")    
                 elif event_type == "error":
                     raise RuntimeError(data["error"])
                 elif event_type == "pending":
                     logger.debug(f"Message pending. {data=}")
+                else:
+                    print("Received unknown event_type!!!")
+                    print(data)
 
 

@@ -5,7 +5,8 @@ authors = [
     { name = "Mario Ceresa", email = "mario.ceresa@ec.europa.eu" }
 ]
 dependencies = [
-    "sseclient",
+    "sseclient-py",
+    "requests"
 ]
 
 [project.optional-dependencies]
