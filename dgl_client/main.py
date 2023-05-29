@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import sys
-from .api_cli import APIClient
+from .api_cli import APIClient, prepare_token
 import uuid
 from glob import glob
 import json
@@ -36,12 +36,13 @@ def main_ls(args):
       logger.error("Resource not found!")
 
 def do_login(args, client):
-  if args.token_file:
-    if os.path.exists(args.token_file):
-      tokens = {}
-      with open(args.token_file,"r") as fp:
-        tokens = json.load(fp)
-      client.login(tokens)
+  if args.access_key:
+    client.login(args.access_key)
+    # if os.path.exists(args.token_file):
+    #   tokens = {}
+    #   with open(args.token_file,"r") as fp:
+    #     tokens = json.load(fp)
+    #   client.login(tokens)
 
   return True
 
@@ -76,7 +77,7 @@ def main_chat(args):
 
 def main():
   DGL_API_ENDPOINT = "https://www.diglife.eu/inference"
-  if "DGL_API_ENDPOINT" in os.environ:
+  if "DGL_API_ENDPOINT" in os.environ and os.environ["DGL_API_ENDPOINT"]:
     DGL_API_ENDPOINT = os.environ["DGL_API_ENDPOINT"]
 
   parser = argparse.ArgumentParser(description='DigLife API Client.')
@@ -93,7 +94,7 @@ def main():
                       help='say something to the model')
   chat_p.add_argument('-c','--chat-id', type=str,
                       help='Continue previous chat')
-  chat_p.add_argument('-t','--token-file', type=str, required=True,
+  chat_p.add_argument('-k','--access_key', type=str, required=True,
                       help='Access keys to authenticate to the API')
   chat_p.add_argument('-m','--model', type=str, required=True,
                       help='Which model do you want to talk to?')

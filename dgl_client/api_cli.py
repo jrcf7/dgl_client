@@ -8,6 +8,22 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+import json
+from base64 import b64decode, b64encode
+
+def prepare_token(api_key: str, user_id: str , provider_account_id: str, username: str, client="website"):
+    token_data = {
+        "api_key": api_key,
+        "client": client,
+        "user_id": user_id,
+        "provider_account_id": provider_account_id,
+        "username": username
+    }
+
+    token = b64encode(json.dumps(token_data).encode())
+    return token
+
+
 def login_check(endp, tok):
     logger.info("Trying to login...")
     username = None
@@ -43,6 +59,26 @@ def refresh_token(endp, atok, rtok):
 
     return new_tok
 
+def ak2token(endp, access_key):
+    logger.info("Logging in using access_key...")
+    new_tok = None
+    try:
+      response = requests.post(
+          f"{endp}/auth/trusted_login",
+          json={},
+          headers={
+              "TrustedClient": f"{access_key}"
+              },
+      )
+      response.raise_for_status()
+      new_tok = response.json()
+    except:
+      raise
+    logger.info("New token is %s"%str(new_tok))
+
+    return new_tok
+
+
 class APIClient:
     def __init__(self, backend_url, http_client=requests):
         self.backend_url = backend_url
@@ -50,18 +86,15 @@ class APIClient:
         self.auth_headers = None
         self.message_id = None
 
-    def login(self, tokens):
-        print(tokens)
-        atok = tokens["access_token"]["access_token"] + "e"
-        rtok = tokens["refresh_token"]["access_token"]
-        self.auth_headers = {"Authorization": f"Bearer {atok}"}
-        username = login_check(self.backend_url, atok)
-        if username is None:
-          atok = refresh_token(self.backend_url, atok, rtok)
-          if atok:
-            username = login_check(self.backend_url, atok)
+    def login(self, access_key):
+        print(access_key)
+        atok = ak2token(self.backend_url, access_key)
 
-        logger.info(f"Logged in as {username}")
+        username = login_check(self.backend_url, atok)
+
+        if username:
+            logger.info(f"Logged in as {username}")    
+            self.auth_headers = {"Authorization": f"Bearer {atok}"}
 
 
     def continue_chat(self, chat_id):
