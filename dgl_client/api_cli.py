@@ -55,7 +55,7 @@ def refresh_token(endp, atok, rtok):
       new_tok = response.json()
     except:
       raise
-    logger.info("New token is %s"%str(new_tok))
+    logger.debug("New token is %s"%str(new_tok))
 
     return new_tok
 
@@ -74,7 +74,7 @@ def ak2token(endp, access_key):
       new_tok = response.json()
     except:
       raise
-    logger.info("New token is %s"%str(new_tok))
+    logger.debug("New token is %s"%str(new_tok))
 
     return new_tok
 
@@ -87,18 +87,19 @@ class APIClient:
         self.message_id = None
 
     def login(self, access_key):
-        print(access_key)
         atok = ak2token(self.backend_url, access_key)
-
         username = login_check(self.backend_url, atok)
-
         if username:
             logger.info(f"Logged in as {username}")    
             self.auth_headers = {"Authorization": f"Bearer {atok}"}
 
-
-    def continue_chat(self, chat_id):
+    def continue_chat(self, chat_id, message_id=None):
         self.chat_id = chat_id
+        if not message_id:
+            mess = self.list_messages(chat_id)
+            if len(mess) > 0:
+                message_id = mess[0]
+        self.message_id = message_id
         return self.chat_id
 
     def create_chat(self):
@@ -111,6 +112,36 @@ class APIClient:
         self.chat_id = response.json()["id"]
         self.message_id = None
         return self.chat_id
+
+    def list_chats(self):
+        response = self.http_client.get(
+            f"{self.backend_url}/chats",
+            json={},
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        res = response.json()
+
+        bag = []
+        if "chats" in res:
+            for chat in res["chats"]:
+                bag.append((chat["id"], chat["title"]))
+
+        return bag
+
+    def list_messages(self, chat_id):
+        response = self.http_client.get(
+            f"{self.backend_url}/chats/%s"%chat_id,
+            json={},
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        res = response.json()
+        messages = res["messages"]
+        bag = []
+        for message in messages:
+            bag.append(message["id"])
+        return bag        
 
     def get_available_models(self):
         response = self.http_client.get(
@@ -129,8 +160,10 @@ class APIClient:
         return [model["name"] for model in response.json()]
 
     def send_message(self, message, model_config_name, collection=None):
+        print("PARENT:",self.message_id)
         response = self.http_client.post(
             f"{self.backend_url}/chats/{self.chat_id}/prompter_message",
+            #f"http://localhost:12345/chats/{self.chat_id}/prompter_message",            
             json={
                 "parent_id": self.message_id,
                 "content": message,
@@ -140,6 +173,7 @@ class APIClient:
         )
         response.raise_for_status()
         prompter_message_id = response.json()["id"]
+        print("MESSAGEID",prompter_message_id)
 
         response = self.http_client.post(
             f"{self.backend_url}/chats/{self.chat_id}/assistant_message",

@@ -26,25 +26,48 @@ def list_models(args):
 
   return available_models, available_wkf
 
+def list_chats(args):
+  client = get_client(args)
+  do_login(args, client)
+  chats = client.list_chats()
+  logger.info("Found %d existing chats"%(len(chats)))
+
+  for chat in chats:
+    print("* %s - %s"%(chat[0],chat[1][:25]))
+
+  return chats
+
+def list_messages(args, chat_id):
+  client = get_client(args)
+  do_login(args, client)
+  messages = client.list_messages(chat_id)
+  logger.info("Found %d existing chats"%(len(messages)))
+
+  for message in messages:
+    print(message)
+
+  return messages
+
 def main_ls(args):
   match args.resource:
     case "models":
       list_models(args)
     case "model":
       list_models(args)      
+    case "chats":
+      list_chats(args)            
+    case "messages":
+      if args.chat_id:
+        list_messages(args, args.chat_id)
     case _:
       logger.error("Resource not found!")
 
 def do_login(args, client):
   if args.access_key:
     client.login(args.access_key)
-    # if os.path.exists(args.token_file):
-    #   tokens = {}
-    #   with open(args.token_file,"r") as fp:
-    #     tokens = json.load(fp)
-    #   client.login(tokens)
+    return True
 
-  return True
+  return False
 
 def main_chat(args):
   client = get_client(args)
@@ -85,6 +108,10 @@ def main():
                       help='Where to store logs')
   parser.add_argument('--endpoint', type=str, default=DGL_API_ENDPOINT,
                       help='Endpoint for the inference')
+  parser.add_argument('-k','--access_key', type=str, required=True,
+                      help='Access keys to authenticate to the API')                      
+  parser.add_argument('-c','--chat-id', type=str,
+                      help='Continue previous chat')
 
   subparsers = parser.add_subparsers(help='You can choose between different commands')
   chat_p = subparsers.add_parser('chat', help='chat with the assistants')
@@ -92,10 +119,6 @@ def main():
 
   chat_p.add_argument('message', type=str, 
                       help='say something to the model')
-  chat_p.add_argument('-c','--chat-id', type=str,
-                      help='Continue previous chat')
-  chat_p.add_argument('-k','--access_key', type=str, required=True,
-                      help='Access keys to authenticate to the API')
   chat_p.add_argument('-m','--model', type=str, required=True,
                       help='Which model do you want to talk to?')
   chat_p.add_argument('-i','--interactive', action='store_true',
