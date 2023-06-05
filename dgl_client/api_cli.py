@@ -159,6 +159,22 @@ class APIClient:
         response.raise_for_status()
         return [model["name"] for model in response.json()]
 
+    def embed(self, message):
+        model_id=""
+        response = self.http_client.post(
+            f"{self.backend_url}/embed",
+            json={
+                "input": message,
+                "model": model_id,
+            },
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        embed = response.json()['data'][0]['embedding']
+        print("EMBED",embed)
+        return embed
+        
+
     def send_message(self, message, model_config_name, collection=None):
         print("PARENT:",self.message_id)
         response = self.http_client.post(
@@ -167,7 +183,7 @@ class APIClient:
             json={
                 "parent_id": self.message_id,
                 "content": message,
-                "collection": collection
+                "data": {"collection": collection}
             },
             headers=self.auth_headers,
         )

@@ -73,6 +73,7 @@ def main_chat(args):
   client = get_client(args)
 
   model_config_name = args.model
+  collection = args.use_collection
 
   do_login(args, client)
 
@@ -85,7 +86,7 @@ def main_chat(args):
 
   message = args.message
 
-  events = client.send_message(message, model_config_name)
+  events = client.send_message(message, model_config_name, collection=collection)
 
   print()
   print("You: %s"%(message))
@@ -123,7 +124,9 @@ def main():
                       help='Which model do you want to talk to?')
   chat_p.add_argument('-i','--interactive', action='store_true',
                       help='Run interactive chat')
-  
+  chat_p.add_argument('--use-collection', type=str,
+                      help='Add collection information to the model context')
+
   config_p = subparsers.add_parser('ls', help='List resources')
   config_p.add_argument('resource', type=str, 
                       help='For now only models')
