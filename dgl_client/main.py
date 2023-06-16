@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import sys
-from .api_cli import APIClient, prepare_token
+from .api_cli import APIClient
 import uuid
 from glob import glob
 import json
@@ -11,13 +11,13 @@ logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] - [%(filename)
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-def get_client(args):
+def get_inf_client(args):
   logger.info("Connecting to API Endpoint %s"%args.endpoint)
-  client = APIClient(args.endpoint)    
-  return client
+  client = APIClient(args.endpoint, inf_url=args.inference_url)    
+  return client._inference
 
 def list_models(args):
-  client = get_client(args)
+  client = get_inf_client(args)
   available_models = client.get_available_models()
   logger.info("Available models %s"%str(available_models))
 
@@ -27,7 +27,7 @@ def list_models(args):
   return available_models, available_wkf
 
 def list_chats(args):
-  client = get_client(args)
+  client = get_inf_client(args)
   do_login(args, client)
   chats = client.list_chats()
   logger.info("Found %d existing chats"%(len(chats)))
@@ -38,7 +38,7 @@ def list_chats(args):
   return chats
 
 def list_messages(args, chat_id):
-  client = get_client(args)
+  client = get_inf_client(args)
   do_login(args, client)
   messages = client.list_messages(chat_id)
   logger.info("Found %d existing chats"%(len(messages)))
@@ -70,7 +70,7 @@ def do_login(args, client):
   return False
 
 def main_chat(args):
-  client = get_client(args)
+  client = get_inf_client(args)
 
   model_config_name = args.model
   collection = args.use_collection
@@ -100,7 +100,7 @@ def main_chat(args):
   return ass_reply
 
 def main():
-  DGL_API_ENDPOINT = "https://www.diglife.eu/inference"
+  DGL_API_ENDPOINT = "https://www.diglife.eu/"
   if "DGL_API_ENDPOINT" in os.environ and os.environ["DGL_API_ENDPOINT"]:
     DGL_API_ENDPOINT = os.environ["DGL_API_ENDPOINT"]
 
@@ -109,6 +109,8 @@ def main():
                       help='Where to store logs')
   parser.add_argument('--endpoint', type=str, default=DGL_API_ENDPOINT,
                       help='Endpoint for the inference')
+  parser.add_argument('--inference-url', type=str, default="/inference",
+                      help='Endpoint for the inference')                      
   parser.add_argument('-k','--access_key', type=str, required=True,
                       help='Access keys to authenticate to the API')                      
   parser.add_argument('-c','--chat-id', type=str,

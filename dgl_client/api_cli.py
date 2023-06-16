@@ -8,87 +8,26 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-import json
-from base64 import b64decode, b64encode
-
-def prepare_token(api_key: str, user_id: str , provider_account_id: str, username: str, client="website"):
-    token_data = {
-        "api_key": api_key,
-        "client": client,
-        "user_id": user_id,
-        "provider_account_id": provider_account_id,
-        "username": username
-    }
-
-    token = b64encode(json.dumps(token_data).encode())
-    return token
-
-
-def login_check(endp, tok):
-    logger.info("Trying to login...")
-    username = None
-    try:
-      response = requests.get(
-          f"{endp}/auth/check",
-          json={},
-          headers={"Authorization": f"Bearer {tok}"},
-      )
-      response.raise_for_status()
-      username = response.json()
-    except:
-      pass
-
-    return username
-
-def refresh_token(endp, atok, rtok):
-    logger.info("Refreshing login token...")
-    new_tok = None
-    try:
-      response = requests.get(
-          f"{endp}/auth/refresh",
-          json={},
-          headers={
-              "Refresh": f"{rtok}"
-              },
-      )
-      response.raise_for_status()
-      new_tok = response.json()
-    except:
-      raise
-    logger.debug("New token is %s"%str(new_tok))
-
-    return new_tok
-
-def ak2token(endp, access_key):
-    logger.info("Logging in using access_key...")
-    new_tok = None
-    try:
-      response = requests.post(
-          f"{endp}/auth/trusted_login",
-          json={},
-          headers={
-              "TrustedClient": f"{access_key}"
-              },
-      )
-      response.raise_for_status()
-      new_tok = response.json()
-    except:
-      raise
-    logger.debug("New token is %s"%str(new_tok))
-
-    return new_tok
-
-
-class APIClient:
+from .utils import inf_ak2token, inf_login_check, inf_prepare_token, inf_refresh_token
+class BaseClient:
     def __init__(self, backend_url, http_client=requests):
         self.backend_url = backend_url
         self.http_client = http_client
         self.auth_headers = None
-        self.message_id = None
+
+class BackendClient(BaseClient):
+    def login(self, access_key):
+        atok = bck_ak2token(self.base_url, access_key)
+        username = bck_login_check(self.base_url, atok)
+        if username:
+            logger.info(f"Logged in as {username}")    
+            self.auth_headers = {"Authorization": f"Bearer {atok}"}    
+
+class InferenceClient(BaseClient):
 
     def login(self, access_key):
-        atok = ak2token(self.backend_url, access_key)
-        username = login_check(self.backend_url, atok)
+        atok = inf_ak2token(self.backend_url, access_key)
+        username = inf_login_check(self.backend_url, atok)
         if username:
             logger.info(f"Logged in as {username}")    
             self.auth_headers = {"Authorization": f"Bearer {atok}"}
@@ -179,7 +118,6 @@ class APIClient:
         print("PARENT:",self.message_id)
         response = self.http_client.post(
             f"{self.backend_url}/chats/{self.chat_id}/prompter_message",
-            #f"http://localhost:12345/chats/{self.chat_id}/prompter_message",            
             json={
                 "parent_id": self.message_id,
                 "content": message,
@@ -257,5 +195,24 @@ class APIClient:
                 else:
                     print("Received unknown event_type!!!")
                     print(data)
+    
+
+class APIClient:
+    def __init__(self, base_url, api_url="/api/v1", inf_url="/inference", http_client=requests):
+        backend_url = base_url + api_url
+        self._backend = BackendClient(backend_url)
+
+        inference_url = base_url + inf_url
+        self._inference = InferenceClient(inference_url)
+
+    def login(self, access_key):
+        self._backend.login(access_key)
+        self._inference.login(access_key)        
+
+
+        
+
+
+
 
 
