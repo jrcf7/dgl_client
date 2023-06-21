@@ -129,6 +129,11 @@ def main():
   chat_p.add_argument('--use-collection', type=str,
                       help='Add collection information to the model context')
 
+  coll_p = subparsers.add_parser('coll', help='Document collections')
+  coll_p.add_argument('collection', type=str, 
+                      help='For now only models')
+  coll_p.set_defaults(func=main_ls)
+
   config_p = subparsers.add_parser('ls', help='List resources')
   config_p.add_argument('resource', type=str, 
                       help='For now only models')

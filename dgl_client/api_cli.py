@@ -23,6 +23,14 @@ class BackendClient(BaseClient):
             logger.info(f"Logged in as {username}")    
             self.auth_headers = {"Authorization": f"Bearer {atok}"}    
 
+    def create_collection(self) -> str:
+        cid:str = ""
+        return cid
+
+    def add_document(self, path) -> str:
+        did:str = ""
+        return did
+
 class InferenceClient(BaseClient):
 
     def login(self, access_key):
