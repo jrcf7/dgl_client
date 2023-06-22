@@ -5,23 +5,32 @@ import json
 import requests
 import sseclient
 import uuid
+from rich import print
 
 logger = logging.getLogger(__name__)
 
 from .utils import inf_ak2token, inf_login_check, inf_prepare_token, inf_refresh_token
+from .utils import bck_ak2token, bck_login_check
+
 class BaseClient:
+    
     def __init__(self, backend_url, http_client=requests):
         self.backend_url = backend_url
         self.http_client = http_client
         self.auth_headers = None
 
 class BackendClient(BaseClient):
-    def login(self, access_key):
-        atok = bck_ak2token(self.base_url, access_key)
-        username = bck_login_check(self.base_url, atok)
+    def login(self, access_key) -> str|None:
+        logger.info(f"Trying to login with {access_key}")    
+
+        #atok = bck_ak2token(self.backend_url, access_key)
+        username = bck_login_check(self.backend_url, access_key)
+
         if username:
             logger.info(f"Logged in as {username}")    
-            self.auth_headers = {"Authorization": f"Bearer {atok}"}    
+            self.auth_headers = {"X-API-Key": f"{access_key}"}    
+        return username
+
 
     def create_collection(self) -> str:
         cid:str = ""
@@ -31,6 +40,23 @@ class BackendClient(BaseClient):
         did:str = ""
         return did
 
+    def get_collections(self) -> str:
+        response = requests.get(
+            f"{self.backend_url}/data/collections/",
+            json={},
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def list_settings(self):        
+        response = requests.get(
+            f"{self.backend_url}/admin/backend_settings/public",
+            json={},
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        print(response.json())
 class InferenceClient(BaseClient):
 
     def login(self, access_key):
@@ -39,6 +65,8 @@ class InferenceClient(BaseClient):
         if username:
             logger.info(f"Logged in as {username}")    
             self.auth_headers = {"Authorization": f"Bearer {atok}"}
+        
+        return username
 
     def continue_chat(self, chat_id, message_id=None):
         self.chat_id = chat_id
