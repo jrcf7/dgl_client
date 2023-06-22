@@ -70,3 +70,39 @@ def inf_ak2token(endp, access_key):
     logger.debug("New token is %s"%str(new_tok))
 
     return new_tok
+
+def bck_ak2token(endp, access_key):
+    logger.info("Logging in using access_key...")
+    new_tok = None
+    try:
+      response = requests.post(
+          f"{endp}/admin/api_client",
+          json={},
+          headers={
+              "TrustedClient": f"{access_key}"
+              },
+      )
+      response.raise_for_status()
+      new_tok = response.json()
+    except:
+      raise
+    logger.debug("New token is %s"%str(new_tok))
+
+    return new_tok    
+
+def bck_login_check(endp, access_key):
+    logger.info("Trying to login...")
+    username = None
+    try:
+      response = requests.get(
+          f"{endp}/auth/check_client",
+          json={},
+          headers={"X-API-Key": f"{access_key}"},
+      )
+      response.raise_for_status()
+      username = response.json()
+    except:
+      pass
+
+    return username    
+
