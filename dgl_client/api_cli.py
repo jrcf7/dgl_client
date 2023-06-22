@@ -32,9 +32,23 @@ class BackendClient(BaseClient):
         return username
 
 
-    def create_collection(self) -> str:
-        cid:str = ""
-        return cid
+    def create_collection(self, 
+            name:str , 
+            descr:str, 
+            bucket:str|None = None
+        ) -> str:
+        bucket = bucket if bucket != None else name
+        response = requests.post(
+            f"{self.backend_url}/data/create_collection/",
+            params={
+                "collection_name":name,
+                "collection_descr":descr,
+                "collection_bucket":bucket
+            },
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()        
 
     def add_document(self, path) -> str:
         did:str = ""

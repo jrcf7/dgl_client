@@ -1,4 +1,5 @@
 import typer
+from rich import print
 from typing import Optional
 import logging
 from .utils import get_inf_client, do_login, DGL_API_ENDPOINT

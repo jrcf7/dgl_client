@@ -24,16 +24,15 @@ app.add_typer(coll, name="collection")
 
 @app.callback(
     invoke_without_command=True,
-    context_settings={
-        "allow_extra_args": True, 
-        "ignore_unknown_options": True
-        }
+    # context_settings={
+    #     "allow_extra_args": True, 
+    #     "ignore_unknown_options": True
+    #     }
     )
 def main(ctx: typer.Context):
     """
     Example of a CLI app with two subcommands imported from external modules
     """
-    print(ctx.args)
     if ctx.invoked_subcommand is None:
         print(f"About to execute command: {ctx.invoked_subcommand}")
 
