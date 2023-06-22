@@ -30,6 +30,26 @@ def create_collection(
         logger.error("Login failed")
         typer.Exit(-1)
 
+@app.command("upload")
+def upload_dcoment(
+  cid: str,
+  path: str,
+  access_key: str = typer.Option(help="The authorization key"),
+  endpoint: str = typer.Option(default=DGL_API_ENDPOINT,help="The main endpoint of the system"),
+  inference_url: str = typer.Option(default="api/v1/"),
+  ):
+    client = get_back_client(endpoint, inference_url)    
+    if (client.login(access_key)):
+        coll = client.upload_document(
+            cid = cid,
+            path = path,
+        )
+        if coll:
+            print(coll)
+    else:
+        logger.error("Login failed")
+        typer.Exit(-1)
+
 @app.command("ls")
 def list_collections(
   access_key: str = typer.Option(help="The authorization key"),

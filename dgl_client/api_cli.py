@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 from .utils import inf_ak2token, inf_login_check, inf_prepare_token, inf_refresh_token
 from .utils import bck_ak2token, bck_login_check
 
+# try:
+#     import http.client as http_client
+# except ImportError:
+#     # Python 2
+#     import httplib as http_client
+# http_client.HTTPConnection.debuglevel = 1
+
 class BaseClient:
     
     def __init__(self, backend_url, http_client=requests):
@@ -50,9 +57,23 @@ class BackendClient(BaseClient):
         response.raise_for_status()
         return response.json()        
 
-    def add_document(self, path) -> str:
-        did:str = ""
-        return did
+    def upload_documents(self, cid:str, path:str) -> str:
+
+        headers = self.auth_headers
+        # headers.update(
+        #     {'Content-Type': 'multipart/form-data'}
+        # )
+        with open(path,'rb') as fp:
+            response = requests.post(
+                f"{self.backend_url}/data/collections/{cid}/upload",
+                files=[
+                    ("files", ("file", fp)),
+                ],
+                headers=headers
+            )
+
+        response.raise_for_status()
+        return response.json()           
 
     def get_collections(self) -> str:
         response = requests.get(
