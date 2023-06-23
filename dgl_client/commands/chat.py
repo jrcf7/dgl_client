@@ -1,7 +1,7 @@
 import typer
 import logging
 from ..api_cli import APIClient, InferenceClient
-from .utils import get_inf_client, do_login, DGL_API_ENDPOINT
+from .utils import get_inf_client, do_login, DGL_INF_ENDPOINT
 
 logger = logging.getLogger(__name__)
 app = typer.Typer()
@@ -13,9 +13,9 @@ def send_message(
     chat_id: str = "",
     interactive: bool = False,
     collection: str = "",
-    endpoint: str = typer.Option(default=DGL_API_ENDPOINT),
+    endpoint: str = typer.Option(default=DGL_INF_ENDPOINT),
     inference_url: str = typer.Option(default="inference"),
-    access_key: str = ""
+    access_key: str = typer.Option(default="inference")
 ):
     """
     Send a message MSG to a MODEL
@@ -31,7 +31,9 @@ def send_message(
     """
     client = get_inf_client(endpoint, inference_url)
 
-    do_login(access_key, client)
+    if not do_login(access_key, client):
+        logger.error("Login failed!")
+        typer.Exit(-1)
 
     if chat_id:
         chat_id = client.continue_chat(chat_id)

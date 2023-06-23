@@ -4,9 +4,13 @@ from ..api_cli import APIClient, InferenceClient, BackendClient
 
 logger = logging.getLogger(__name__)
 
-DGL_API_ENDPOINT = "https://www.diglife.eu/"
-if "DGL_API_ENDPOINT" in os.environ and os.environ["DGL_API_ENDPOINT"]:
-    DGL_API_ENDPOINT = os.environ["DGL_API_ENDPOINT"]
+DGL_INF_ENDPOINT = "https://www.diglife.eu/"
+if "DGL_INF_ENDPOINT" in os.environ and os.environ["DGL_INF_ENDPOINT"]:
+    DGL_INF_ENDPOINT = os.environ["DGL_INF_ENDPOINT"]
+
+DGL_BCK_ENDPOINT = "https://www.diglife.eu/"
+if "DGL_BCK_ENDPOINT" in os.environ and os.environ["DGL_BCK_ENDPOINT"]:
+    DGL_BCK_ENDPOINT = os.environ["DGL_BCK_ENDPOINT"]    
 
 def get_inf_client(endpoint: str, inference_url: str) -> InferenceClient:
   logger.info("Connecting to API Endpoint %s"%endpoint)

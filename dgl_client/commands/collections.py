@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from .utils import get_back_client, do_login, DGL_API_ENDPOINT
+from .utils import get_back_client, do_login, DGL_BCK_ENDPOINT
 
 app = typer.Typer()
 
@@ -14,7 +14,7 @@ def create_collection(
   descr: str,
   bucket: str|None = None,
   access_key: str = typer.Option(help="The authorization key"),
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT,help="The main endpoint of the system"),
+  endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT,help="The main endpoint of the system"),
   inference_url: str = typer.Option(default="api/v1/"),
   ):
     client = get_back_client(endpoint, inference_url)    
@@ -35,7 +35,7 @@ def upload_dcoment(
   cid: str,
   path: str,
   access_key: str = typer.Option(help="The authorization key"),
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT,help="The main endpoint of the system"),
+  endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT,help="The main endpoint of the system"),
   inference_url: str = typer.Option(default="api/v1/"),
   ):
     client = get_back_client(endpoint, inference_url)    
@@ -53,7 +53,7 @@ def upload_dcoment(
 @app.command("ls")
 def list_collections(
   access_key: str = typer.Option(help="The authorization key"),
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT),
+  endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
   ):
     client = get_back_client(endpoint, inference_url)    
@@ -69,7 +69,7 @@ def list_collections(
 def list_documents(
   cid: str, 
   access_key: str = typer.Option(help="The authorization key"),
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT),
+  endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
   ):
     client = get_back_client(endpoint, inference_url)    
@@ -88,7 +88,7 @@ def download_document(
   did: str,
   filename: str = typer.Option(help="File name to save to"),
   access_key: str = typer.Option(help="The authorization key"),
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT),
+  endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
   ):
     client = get_back_client(endpoint, inference_url)    

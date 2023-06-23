@@ -313,7 +313,7 @@ class InferenceClient(BaseClient):
     
 
 class APIClient:
-    def __init__(self, base_url, api_url="/api/v1", inf_url="/inference", http_client=requests):
+    def __init__(self, base_url, api_url="api/v1", inf_url="inference", http_client=requests):
         backend_url = base_url + api_url
         self._backend = BackendClient(backend_url)
 

@@ -2,7 +2,7 @@ import typer
 from rich import print
 from typing import Optional
 import logging
-from .utils import get_inf_client, do_login, DGL_API_ENDPOINT
+from .utils import get_inf_client, do_login, DGL_INF_ENDPOINT
 
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,8 @@ def list_messages(client, access_key, chat_id):
 @app.callback(invoke_without_command=True)
 def ls(
   resource: str,
-  endpoint: str = typer.Option(default=DGL_API_ENDPOINT),
-  inference_url: str = typer.Option(default="inference/"),
+  endpoint: str = typer.Option(default=DGL_INF_ENDPOINT),
+  inference_url: str = typer.Option(default="/inference/"),
   ):
     client = get_inf_client(endpoint, inference_url)
 
