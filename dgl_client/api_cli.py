@@ -5,6 +5,7 @@ import json
 import requests
 import sseclient
 import uuid
+import shutil
 from rich import print
 
 logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class BackendClient(BaseClient):
     def upload_document(self, cid, path:str) -> str:
         with open(path,'rb') as fp:
             response = requests.post(
-                f"{self.backend_url}/data/collections/{cid}/upload",
+                f"{self.backend_url}/data/collections/{cid}/documents",
                 files=[
                     ("files", (path, fp)),
                 ],
@@ -78,7 +79,27 @@ class BackendClient(BaseClient):
             )
         return ids
                  
-         
+    def download_document(self, cid:str, did:str, filename:str) -> bool:
+        with requests.get(
+                f"{self.backend_url}/data/collections/{cid}/documents/{did}", 
+                stream=True,
+                headers=self.auth_headers
+            ) as r:
+
+            r.raise_for_status()
+            with open(filename, 'wb') as fp:
+                shutil.copyfileobj(r.raw, fp)
+
+        return True
+
+    def get_documents(self, cid) -> str:
+        response = requests.get(
+            f"{self.backend_url}/data/collections/{cid}/documents",
+            json={},
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+        return response.json()
 
     def get_collections(self) -> str:
         response = requests.get(
