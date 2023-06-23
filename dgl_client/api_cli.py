@@ -57,23 +57,28 @@ class BackendClient(BaseClient):
         response.raise_for_status()
         return response.json()        
 
-    def upload_documents(self, cid:str, path:str) -> str:
-
-        headers = self.auth_headers
-        # headers.update(
-        #     {'Content-Type': 'multipart/form-data'}
-        # )
+    def upload_document(self, cid, path:str) -> str:
         with open(path,'rb') as fp:
             response = requests.post(
                 f"{self.backend_url}/data/collections/{cid}/upload",
                 files=[
-                    ("files", ("file", fp)),
+                    ("files", (path, fp)),
                 ],
-                headers=headers
+                headers=self.auth_headers
             )
 
         response.raise_for_status()
-        return response.json()           
+        return response.json()  
+
+    def upload_documents(self, cid:str, paths:list[str]) -> list[str]:
+        ids = []
+        for path in paths:
+            ids.append(
+                self.upload_document(cid, path)
+            )
+        return ids
+                 
+         
 
     def get_collections(self) -> str:
         response = requests.get(
