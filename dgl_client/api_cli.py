@@ -39,6 +39,25 @@ class BackendClient(BaseClient):
             self.auth_headers = {"X-API-Key": f"{access_key}"}    
         return username
 
+    def find_collection(self, 
+            name: str, 
+        ) -> str:
+        for coll in self.get_collections():
+            coll["id"] == name
+
+        return coll
+
+    def find_or_create_collection(self, 
+            name:str , 
+            descr:str, 
+            bucket:str|None = None
+        ) -> str:
+        coll = self.find_collection(name)
+        if coll:
+            return coll
+        
+        coll = self.create_collection(name, descr, bucket)
+        return coll
 
     def create_collection(self, 
             name:str , 
@@ -62,12 +81,11 @@ class BackendClient(BaseClient):
         with open(path,'rb') as fp:
             response = requests.post(
                 f"{self.backend_url}/data/collections/{cid}/documents",
-                files=[
-                    ("files", (path, fp)),
+                files= [
+                    ("files", (str(path), fp)),
                 ],
                 headers=self.auth_headers
             )
-
         response.raise_for_status()
         return response.json()  
 
@@ -92,7 +110,7 @@ class BackendClient(BaseClient):
 
         return True
 
-    def get_documents(self, cid) -> str:
+    def get_documents(self, cid) -> dict:
         response = requests.get(
             f"{self.backend_url}/data/collections/{cid}/documents",
             json={},
