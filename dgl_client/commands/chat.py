@@ -15,7 +15,8 @@ def send_message(
     collection: str = "",
     endpoint: str = typer.Option(default=DGL_INF_ENDPOINT),
     inference_url: str = typer.Option(default="inference"),
-    access_key: str = typer.Option(default="inference")
+    access_key: str = typer.Option(default="inference"),
+    override_prompt: bool = typer.Option(default=False)
 ):
     """
     Send a message MSG to a MODEL

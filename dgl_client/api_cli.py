@@ -233,7 +233,7 @@ class InferenceClient(BaseClient):
         return embed
         
 
-    def send_message(self, message, model_config_name, collection=None):
+    def send_message(self, message, model_config_name, collection=None, override_prompt=False):
         print("PARENT:",self.message_id)
         response = self.http_client.post(
             f"{self.backend_url}/chats/{self.chat_id}/prompter_message",
