@@ -4,3 +4,4 @@ dist/
 */__pycache__/
 test_decode.py
 *.pyc
+*.sh
