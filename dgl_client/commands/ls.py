@@ -1,11 +1,9 @@
 import typer
 from rich import print
 from typing import Optional
-import logging
+from loguru import logger
 from .utils import get_inf_client, do_login, DGL_INF_ENDPOINT
 
-
-logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 def list_models(client):

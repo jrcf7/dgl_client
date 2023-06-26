@@ -1,8 +1,7 @@
 import typer
 from rich import print
-import logging
+from loguru import logger
 
-logger = logging.getLogger(__name__)
 
 from .utils import get_back_client, do_login, DGL_BCK_ENDPOINT
 
@@ -16,8 +15,9 @@ def create_collection(
   access_key: str = typer.Option(help="The authorization key"),
   endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT,help="The main endpoint of the system"),
   inference_url: str = typer.Option(default="api/v1/"),
+  debug: bool = typer.Option(default=False),  
   ):
-    client = get_back_client(endpoint, inference_url)    
+    client = get_back_client(endpoint, inference_url, debug=debug)    
     if (client.login(access_key)):
         coll = client.create_collection(
             name = name,
@@ -37,8 +37,9 @@ def upload_dcoment(
   access_key: str = typer.Option(help="The authorization key"),
   endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT,help="The main endpoint of the system"),
   inference_url: str = typer.Option(default="api/v1/"),
+  debug: bool = typer.Option(default=False),  
   ):
-    client = get_back_client(endpoint, inference_url)    
+    client = get_back_client(endpoint, inference_url, debug=debug)    
     if (client.login(access_key)):
         coll = client.upload_document(
             cid = cid,
@@ -55,8 +56,9 @@ def list_collections(
   access_key: str = typer.Option(help="The authorization key"),
   endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
+  debug: bool = typer.Option(default=False),  
   ):
-    client = get_back_client(endpoint, inference_url)    
+    client = get_back_client(endpoint, inference_url, debug=debug)    
     if (client.login(access_key)):
         collections = client.get_collections()
         for coll in collections:
@@ -71,8 +73,9 @@ def list_documents(
   access_key: str = typer.Option(help="The authorization key"),
   endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
+  debug: bool = typer.Option(default=False),
   ):
-    client = get_back_client(endpoint, inference_url)    
+    client = get_back_client(endpoint, inference_url, debug=debug)    
     if (client.login(access_key)):
         documents = client.get_documents(cid)
         print(documents)
@@ -90,8 +93,9 @@ def download_document(
   access_key: str = typer.Option(help="The authorization key"),
   endpoint: str = typer.Option(default=DGL_BCK_ENDPOINT),
   inference_url: str = typer.Option(default="api/v1/"),
+  debug: bool = typer.Option(default=False),
   ):
-    client = get_back_client(endpoint, inference_url)    
+    client = get_back_client(endpoint, inference_url, debug=debug)    
     if (client.login(access_key)):
         client.download_document(cid, did, filename)
     else:

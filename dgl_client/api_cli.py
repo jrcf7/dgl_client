@@ -1,6 +1,6 @@
 import time
 import os
-import logging
+from loguru import logger
 import json
 import requests
 import sseclient
@@ -8,28 +8,24 @@ import uuid
 import shutil
 from rich import print
 
-logger = logging.getLogger(__name__)
 
 from .utils import inf_ak2token, inf_login_check, inf_prepare_token, inf_refresh_token
 from .utils import bck_ak2token, bck_login_check
 
-# try:
-#     import http.client as http_client
-# except ImportError:
-#     # Python 2
-#     import httplib as http_client
-# http_client.HTTPConnection.debuglevel = 1
-
 class BaseClient:
     
-    def __init__(self, backend_url, http_client=requests):
+    def __init__(self, backend_url, http_client=requests, debug=False):
         self.backend_url = backend_url
         self.http_client = http_client
         self.auth_headers = None
 
+        if debug:
+            import http.client as http_client
+            http_client.HTTPConnection.debuglevel = 1
+
 class BackendClient(BaseClient):
     def login(self, access_key) -> str|None:
-        logger.info(f"Trying to login with {access_key}")    
+        logger.info(f"Trying to login to {self.backend_url} with {access_key}")    
 
         #atok = bck_ak2token(self.backend_url, access_key)
         username = bck_login_check(self.backend_url, access_key)
@@ -66,7 +62,7 @@ class BackendClient(BaseClient):
         ) -> str:
         bucket = bucket if bucket != None else name
         response = requests.post(
-            f"{self.backend_url}/data/create_collection/",
+            os.path.join(self.backend_url, "data/create_collection/"),
             params={
                 "collection_name":name,
                 "collection_descr":descr,
@@ -99,7 +95,9 @@ class BackendClient(BaseClient):
                  
     def download_document(self, cid:str, did:str, filename:str) -> bool:
         with requests.get(
-                f"{self.backend_url}/data/collections/{cid}/documents/{did}", 
+                os.path.join(self.backend_url, 
+                    f"data/collections/{cid}/documents/{did}"
+                    ),
                 stream=True,
                 headers=self.auth_headers
             ) as r:
@@ -112,7 +110,9 @@ class BackendClient(BaseClient):
 
     def get_documents(self, cid) -> dict:
         response = requests.get(
-            f"{self.backend_url}/data/collections/{cid}/documents",
+            os.path.join(self.backend_url, 
+                f"data/collections/{cid}/documents"
+            ),
             json={},
             headers=self.auth_headers,
         )
@@ -121,7 +121,9 @@ class BackendClient(BaseClient):
 
     def get_collections(self) -> str:
         response = requests.get(
-            f"{self.backend_url}/data/collections/",
+                os.path.join(self.backend_url, 
+                f"data/collections/"
+                ),
             json={},
             headers=self.auth_headers,
         )
@@ -130,7 +132,9 @@ class BackendClient(BaseClient):
 
     def list_settings(self):        
         response = requests.get(
-            f"{self.backend_url}/admin/backend_settings/public",
+                os.path.join(self.backend_url, 
+                f"admin/backend_settings/public"
+                ),
             json={},
             headers=self.auth_headers,
         )
@@ -314,12 +318,12 @@ class InferenceClient(BaseClient):
     
 
 class APIClient:
-    def __init__(self, base_url, api_url="api/v1", inf_url="inference", http_client=requests):
-        backend_url = base_url + api_url
-        self._backend = BackendClient(backend_url)
+    def __init__(self, base_url, api_url="api/v1", inf_url="inference", http_client=requests, debug=False):
+        backend_url = os.path.join(base_url, api_url)
+        self._backend = BackendClient(backend_url, debug=debug)
 
-        inference_url = base_url + inf_url
-        self._inference = InferenceClient(inference_url)
+        inference_url = os.path.join(base_url, inf_url)
+        self._inference = InferenceClient(inference_url, debug=debug)
 
     def login(self, access_key):
         self._backend.login(access_key)

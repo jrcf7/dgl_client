@@ -1,8 +1,8 @@
 import json
+import os
 from base64 import b64decode, b64encode
 import requests
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 def inf_prepare_token(api_key: str, user_id: str , provider_account_id: str, username: str, client="website"):
     token_data = {
@@ -95,14 +95,17 @@ def bck_login_check(endp, access_key):
     username = None
     try:
       response = requests.get(
-          f"{endp}/auth/check_client",
+          os.path.join(endp, 
+            f"auth/check_client"
+            ),
           json={},
           headers={"X-API-Key": f"{access_key}"},
       )
       response.raise_for_status()
       username = response.json()
-    except:
-      pass
+    except Exception as e:
+      logger.error(f"Login failed with error {e}")
+
 
     return username    
 

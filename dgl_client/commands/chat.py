@@ -1,9 +1,9 @@
 import typer
-import logging
+from loguru import logger
+
 from ..api_cli import APIClient, InferenceClient
 from .utils import get_inf_client, do_login, DGL_INF_ENDPOINT
 
-logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 @app.callback(invoke_without_command=True)
