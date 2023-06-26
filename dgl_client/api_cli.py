@@ -255,6 +255,7 @@ class InferenceClient(BaseClient):
                     "repetition_penalty": 1.2,
                     "temperature": 1.0,
                 },
+                "collection": {"name": collection}
             },
             headers=self.auth_headers,
         )
