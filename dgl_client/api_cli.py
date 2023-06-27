@@ -8,12 +8,10 @@ import uuid
 import shutil
 from rich import print
 
-
 from .utils import inf_ak2token, inf_login_check, inf_prepare_token, inf_refresh_token
 from .utils import bck_ak2token, bck_login_check
 
 class BaseClient:
-    
     def __init__(self, backend_url, http_client=requests, debug=False):
         self.backend_url = backend_url
         self.http_client = http_client
